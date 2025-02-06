@@ -8,6 +8,12 @@ Este es el proyecto de mi biblioteca, donde se gestionan libros y usuarios.
 ## Funcionalidades
 - Gestión de libros
 - Gestión de usuarios
+- Agregar libros de manera mas eficiente
+- Verificar y agregar prestamos
+- Eliminar libros
+- Verificar actividad de cada libro
+- Filtrar por actividad
+- Actualizar informacion de libro 
 
 ## Cómo instalar
 1. Clona el repositorio.
