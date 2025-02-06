@@ -1,0 +1,10 @@
+Para correr los numeros y eliminar que el autoincrement inicie en otro numero que no es se usa lo siguiente
+
+SET @new_id = 0;
+UPDATE libros
+SET id = (@new_id := @new_id + 1)
+ORDER BY id;
+
+Para que inicie del ultimo id
+
+ALTER TABLE libros AUTO_INCREMENT = 1;

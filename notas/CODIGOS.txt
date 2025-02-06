@@ -1,0 +1,66 @@
+eliminarLibro($id) {
+        try {
+            $conexion = new Conexion();
+            $consulta = "DELETE FROM libros WHERE ID = :id";
+            $stmt = $conexion->prepare($consulta);
+            $stmt->bindParam(':id', $id);
+            return $stmt->execute();
+        } catch (Exception $e) {
+            return false;
+        }
+    } 
+function eliminarLibro($id) {
+    try {
+        // Crear una instancia de la conexión
+        $conexion = new Conexion();
+
+        // Iniciar una transacción
+        $conexion->beginTransaction();
+
+        // Verificar si el libro existe antes de eliminarlo
+        $verificar = $conexion->prepare("SELECT COUNT(*) FROM libros WHERE ID = :id");
+        $verificar->bindParam(':id', $id, PDO::PARAM_INT);
+        $verificar->execute();
+
+        if ($verificar->fetchColumn() == 0) {
+            // Si el libro no existe, lanza un error específico
+            throw new Exception("El libro con ID $id no existe en la base de datos.");
+        }
+
+        // Eliminar el libro con el ID proporcionado
+        $consulta = "DELETE FROM libros WHERE ID = :id";
+        $stmt = $conexion->prepare($consulta);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+        if (!$stmt->execute()) {
+            // Si la eliminación falla, lanza una excepción
+            throw new Exception("No se pudo eliminar el libro con ID: $id");
+        }
+
+        // Reasignar los IDs en orden secuencial
+        $reasignarConsulta = "
+            SET @new_id = 0;
+            UPDATE libros
+            SET ID = (@new_id := @new_id + 1)
+            ORDER BY ID;
+        ";
+        $conexion->exec($reasignarConsulta);
+
+        // Reiniciar el AUTO_INCREMENT
+        $reiniciarAutoIncrement = "ALTER TABLE libros AUTO_INCREMENT = 1;";
+        $conexion->exec($reiniciarAutoIncrement);
+
+        // Confirmar los cambios
+        $conexion->commit();
+
+        return true;
+
+    } catch (Exception $e) {
+        // Si ocurrió un error real, se registra y devuelve un mensaje.
+        if ($conexion->inTransaction()) {
+            $conexion->rollBack();
+        }
+        error_log("Error en eliminarLibro: " . $e->getMessage());
+        return false;
+    }
+}
