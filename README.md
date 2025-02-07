@@ -15,7 +15,11 @@ Este es el proyecto de mi biblioteca, donde se gestionan libros y usuarios.
 - Eliminar libros
 - Verificar actividad de cada libro
 - Filtrar por actividad
-- Actualizar informacion de libro 
+- Actualizar informacion de libro
+
+# VIDEO
+
+<p>You can see the video complete here https://youtu.be/O_Uasg4kb58</p>
 
 ## Cómo instalar
 1. Clona el repositorio.
