@@ -44,4 +44,26 @@ class misAreas {
         }
         return $arreglo;
     }
+    function agregarArea( $TipoArea) {
+        try {
+            $conexion = new Conexion();
+            $consulta = "INSERT INTO area (areas) 
+                         VALUES (:areas)";
+    
+            $stmt = $conexion->prepare($consulta);
+    
+            $stmt->bindParam(':areas',  $TipoArea);
+    
+
+            if (!$stmt->execute()) {
+                
+                return false;
+            }
+            return true;
+        } catch (Exception $e) {
+           
+            return false;
+        }
+    }
+
 }

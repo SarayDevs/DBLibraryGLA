@@ -1,0 +1,349 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: rgba(106, 233, 138, 0.397);
+    color: #333;
+    margin: 0;
+    padding: 1px;
+}
+
+.container {
+    width: 1400px;
+    margin: auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.catalogo {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+.tarjeta img {
+    width: 250px;
+    height: 350px;
+    object-fit: cover;
+    /* Recorta la imagen para llenar el espacio */
+    border-radius: 10px;
+    display: block;
+    /* Opcional: esquinas redondeadas */
+    margin: 0 auto;
+    /* Esto centra horizontalmente la imagen */
+}
+
+.tarjeta {
+    width: 350px;
+    height: 800px;
+    display: flex;
+    flex-direction: column;
+    /* Acomoda los elementos verticalmente */
+    justify-content: space-between;
+    /* Espacia la imagen arriba y el contenido abajo */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+h1 {
+    font-size: 2em;
+    color: #444;
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+p {
+    font-size: 1.1em;
+    margin: 8px 0;
+    padding: 10px;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+p strong {
+    color: #555;
+    font-weight: bold;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.back-link:hover {
+    background-color: #0056b3;
+}
+
+.table-container {
+    font-family: sans-serif;
+    margin: 20px 0;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 2000px;
+    max-width: 2000px;
+    font-size: 0.9em;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table td,
+.table th {
+    padding: 12px;
+    text-align: center;
+}
+
+.table td input,
+.table td select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+}
+
+.table th,
+.table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+}
+
+.table thead th {
+    background-color: #14cf65;
+    color: #fff;
+    font-weight: bold;
+}
+
+.table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.search-bar,
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.search-bar input[type="text"] {
+    width: 200px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #51d9ce;
+}
+
+.search-bar button,
+.pagination a {
+    padding: 8px 12px;
+    margin-left: 5px;
+    background-color: #51d9ce;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.pagination a:hover,
+.search-bar button:hover {
+    background-color: #0056b3;
+}
+
+.pagination a.pagina-actual {
+    background-color: #3db2a9;
+    font-weight: bold;
+    cursor: default;
+    pointer-events: none;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.buscar-btn {
+    background-color: #007bff;
+    size: smaller;
+}
+
+.buscar-btn:hover {
+    background-color: #0056b3;
+}
+
+.search_bar input[type="text"] {
+    min-width: 1000px;
+    padding: 8px 12px;
+    width: 70%;
+    border: 1px solid #ddd;
+    border-radius: 5px 0 0 5px;
+    outline: none;
+    transition: box-shadow 0.3s ease;
+    font-size: 16px;
+}
+
+.search_bar input[type="text"]:focus {
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    border-color: #007bff;
+}
+
+.search_bar {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.search_bar form {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.search_bar button {
+    border-radius: 0 5px 5px 0;
+}
+
+.form-control {
+    margin-top: 5px;
+    border-radius: 4px;
+}
+
+button[type="submit"]:hover,
+button[type="button"]:hover {
+    background-color: #0056b3;
+}
+
+.container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.table-containerr {
+    text-align: center;
+    width: 100%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+}
+
+.table-containerr th {
+    background-color: #70d199;
+    color: white;
+    text-align: center;
+    padding: 12px;
+    font-weight: bold;
+}
+
+.table-containerr td {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.table-containerr tr:hover {
+    background-color: #f1f1f1;
+}
+
+.table-containerr td:first-child {
+    font-weight: bold;
+    color: #333;
+}
+
+.table-containerr td:last-child {
+    text-align: center;
+}
+
+.btn-small {
+    font-size: 14px;
+    padding: 4px 8px;
+    height: 30px;
+    border-radius: 4px;
+    min-width: 85px;
+}
+
+.agregar-btn {
+    padding: 13px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #14cf65;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: center;
+    /* Asegura la alineación vertical */
+}
+
+.agregar-btn:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.detalles-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.detalles-btn:hover {
+    background-color: #0056b3;
+}
+
+.filtro-area {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.filtro-area:hover {
+    border-color: #999;
+    background-color: #f0f0f0;
+}
+
+.filtro-area:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+    background-color: #fff;
+}
+
+
+/* Responsive: Ajusta el diseño en pantallas pequeñas */
+
+@media (max-width: 768px) {
+    .filtros {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

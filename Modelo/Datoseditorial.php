@@ -45,28 +45,26 @@ class misEditoriales {
         }
         return $arreglo;
     }
-    function agregarEditorial( $TipoEditorial) {
+    public function agregarEditorial($TipoEditorial) {
         try {
             $conexion = new Conexion();
-            $consulta = "INSERT INTO editorial (Editoriales) 
-                         VALUES (:Editoriales)";
-    
+            $consulta = "INSERT INTO editorial (editoriales) VALUES (:Editoriales)";
+        
             $stmt = $conexion->prepare($consulta);
-    
-            $stmt->bindParam(':Editoriales',  $TipoEditorial);
-    
-
+            $stmt->bindParam(':Editoriales', $TipoEditorial);
+        
             if (!$stmt->execute()) {
-                
                 $this->lastError = $stmt->errorInfo()[2]; 
                 return false;
             }
-            return true;
+            
+            return $conexion->lastInsertId(); // Devuelve el ID de la nueva editorial
         } catch (Exception $e) {
             $this->lastError = $e->getMessage(); 
             return false;
         }
     }
+    
     public function getLastError() {
         return $this->lastError;
     }

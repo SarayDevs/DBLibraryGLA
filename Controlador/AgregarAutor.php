@@ -2,11 +2,20 @@
 require_once '../Modelo/Datosautor.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $Autor = $_POST['nombreAutor'];
+    $Autor = isset($_POST['nombreAutor']) ? trim($_POST['nombreAutor']) : null;
 
+    if (!$Autor) {
+        echo json_encode(['success' => false, 'error' => 'El nombre del autor es obligatorio']);
+        exit;
+    }
 
     $autorModelo = new misAutores();
     $idAutor = $autorModelo->agregarAutor($Autor);
-    echo json_encode(['id' => $autorID, 'nombre' => $Autor]);
+
+    if ($idAutor) {
+        echo json_encode(['success' => true, 'id' => $idAutor, 'nombre' => $Autor]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'No se pudo agregar el autor']);
+    }
 }
 ?>

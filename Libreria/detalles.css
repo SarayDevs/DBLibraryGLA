@@ -1,0 +1,161 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: rgba(106, 233, 138, 0.397);
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    min-width: 1000PX;
+    margin: auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.right-section {
+    flex: 1;
+    max-width: 450px;
+    min-width: 350px;
+    text-align: center;
+}
+
+.right-section img {
+    padding: 20px;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.left-section {
+    max-width: 600px;
+    flex: 2;
+    padding-left: 20px;
+}
+
+h1 {
+    font-size: 1.8em;
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+.details p {
+    font-size: 16px;
+    margin: 6px 0;
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 5px;
+}
+
+.details p strong {
+    color: #555;
+    font-weight: bold;
+}
+
+.index-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.index-table th,
+.index-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.index-table th {
+    background-color: #007bff;
+    color: white;
+}
+
+h1 {
+    padding: 50px;
+    font-size: 2em;
+    color: #444;
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+p {
+    font-size: 17px;
+    margin: 8px 0;
+    padding: 2px;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+p strong {
+    color: #555;
+    font-weight: bold;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.back-link:hover {
+    background-color: #0056b3;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* 🔹 Hace que las celdas respeten su ancho */
+}
+
+td:nth-child(2) {
+    /* 🔹 Aplica a la columna de Título */
+    padding: 8px;
+    max-width: 300px;
+    /* 🔹 Ajusta el ancho de la columna */
+    word-wrap: break-word;
+    /* 🔹 Permite que las palabras largas se dividan en varias líneas */
+    white-space: normal;
+    /* 🔹 Permite que el texto baje de línea */
+}
+
+.indice-imagenes {
+    max-width: 1000px;
+    margin: 40px auto;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    /* Cambio clave */
+    flex-wrap: wrap;
+    /* Permite que se ajusten a otra línea si no caben */
+    gap: 15px;
+    /* Espacio entre imágenes */
+    justify-content: center;
+    /* Centra las imágenes horizontalmente */
+}
+
+.indice-imagenes img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+@media (max-width: 768px) {
+    .filtros {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

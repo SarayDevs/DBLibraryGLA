@@ -19,7 +19,7 @@ session_start();
 if (isset($_GET['filtros'])) {
     $_SESSION['filtros'] = $_GET['filtros'];
 }
- 
+
 $libroModelo = new misLibros(); 
 $autorModelo = new misAutores(); 
 $seccionModelo = new misSecciones(); 
@@ -40,9 +40,34 @@ $offset = ($paginaActual - 1) * $limite;
 
 $busqueda = isset($_GET['busqueda']) ? trim($_GET['busqueda']) : '';
 $filtroSeleccionado = isset($_GET['filtros']) && $_GET['filtros'] !== '' ? htmlspecialchars($_GET['filtros'], ENT_QUOTES, 'UTF-8') : null;
-$libros = $libroModelo->verLibros1($limite, $offset, $busqueda, $filtroSeleccionado);
-$totalLibros = $libroModelo->contarLibros1($busqueda, $filtroSeleccionado);
+$filtro_area = isset($_GET['filtro_area']) ? $_GET['filtro_area'] : '';
+
+// Valores por defecto
+$filtro_area = isset($_GET['filtro_area']) ? $_GET['filtro_area'] : '';
+if ($filtro_area == 'bilingue') {
+    // Activa filtro bilingüe
+    $filtro_bilingue = true;
+    $signatura_min = null; // Desactiva rango numérico
+    $signatura_max = null;
+} elseif  (!empty($filtro_area) && $filtro_area !== '') {
+    // Extraer los valores mínimos y máximos del rango
+    $rangos = explode('-', $filtro_area);
+    $signatura_min = isset($rangos[0]) ? intval($rangos[0]) : 0;
+    $signatura_max = isset($rangos[1]) ? intval($rangos[1]) : 999;
+    $filtro_bilingue = false;
+} else {
+    // Si es "todas las áreas" (o vacío), se asigna el rango completo
+    $signatura_min = 0;
+    $signatura_max = 999;
+    $filtro_bilingue = false;
+}
+
+// Ahora sí, llamamos las funciones con los rangos correctos
+$libros = $libroModelo->verLibros2($limite, $offset, $busqueda,  $signatura_min, $signatura_max, $filtroSeleccionado, $filtro_bilingue);
+$totalLibros = $libroModelo->contarLibros2($busqueda, $signatura_min, $signatura_max, $filtroSeleccionado, $filtro_bilingue);
 $totalPaginas = ceil($totalLibros / $limite);
+
+
 
 
 $actividades = $actividadesModelo->verActividades();
@@ -57,7 +82,7 @@ $areas = $areaModelo->verAreas();
 $personas= $personaModelo->verPersonas();
 $prest= $prestModelo->verPrestado();
 $prestamos=$prestamosModelo->verPrestamos();
-$libross = $libroModelo->verLibroID(); 
+
 ?>
 
 <?php if (isset($_GET['mensaje'])): ?>
@@ -76,501 +101,10 @@ $libross = $libroModelo->verLibroID();
         <?php include '../Libreria/libreriajs.php'; ?>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="stylesheet" href="../Libreria/Modal.css">
+        <link rel="stylesheet" href="../Libreria/ver.css">
         <script src="../Controlador/Controprest.js"></script>
         <script src="../Controlador/Controeliminar.js"></script>
-        <style>
-        body {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    background-color: #f7f8fa;
-    color: #333;
-    margin: 0;
-    padding: 1px;
-    background-color: #e5e5f7;
-    background-image:  linear-gradient(#6fdeab 3px, transparent 3px), linear-gradient(90deg, #6fdeab 3px, transparent 3px), linear-gradient(#6fdeab 1.5px, transparent 1.5px), linear-gradient(90deg, #6fdeab 1.5px, #e5e5f7 1.5px); /*color blanco un poquito gris: #f6f6f6. Color un poco azulado: #e5e5f7 */ 
-    background-size: 75px 75px, 75px 75px, 15px 15px, 15px 15px;
-    background-position: -3px -3px, -3px -3px, -1.5px -1.5px, -1.5px -1.5px;
-}
-html.sidebar-initial-collapsed .sidebar {
-    width: 0 !important;
-    overflow: hidden;
-    transition: none !important;
-}
-html.sidebar-initial-collapsed .content {
-    margin-left: 0 !important;
-    transition: none !important;
-}
-.sidebar {
-    width: 250px;
-    background-color: #51d9ce;
-    color: white;
-    position: fixed;
-    height: 100%;
-    top: 0;
-    left: 0;
-    padding-top: 68px;
-    overflow: hidden;
-    z-index: 1;
-    transition: width 0.1s ease; 
-}
-.sidebar.collapsed {                                 
-    width: 0;
-    overflow: hidden;
-}
-.sidebar.collapsed + .content {
-    margin-left: 0;
-}
-.content {
-    transition: margin-left 0.1s ease;
-    margin-left: 250px;
-    padding: 20px;
-    flex-grow: 1;
-    min-height: 50vh;
-    min-width: 2455px;
-}
-.content.no-transition {
-    transition: none;
-}
-.toggle-btn {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    background-color: #5fe9de;
-    color: white;
-    border: none;
-    padding: 10px;
-    font-size: 20px;
-    cursor: pointer;
-    z-index: 10; 
-}
-.sidebar h2 {
-    text-align: center;
-    color: #fff;
-    padding: 20px 0;
-    margin: 0;
-}
-.logo {
-            width: 160px;
-            height: auto;
-            margin-bottom: 20px;
-            padding-top: 9px;
-            margin: 35px;
-        }
-.sidebar ul {
-    list-style-type: none;
-    padding: 0;
-}
-.sidebar ul li {
-    padding: 15px;
-    text-align: center;
-}
-.sidebar ul li a.active {
-    background-color: #3db2a9; 
-    color: #ffffff; 
-    font-weight: bold; 
-}
-.sidebar ul li a {
-    color: white;
-    text-decoration: none;
-    display: block;
-    font-size: 18px;
-}
-.sidebar ul li a:hover {
-    background-color: #49c4ba;
-}
-.content h1 {
-    font-size: 24px;
-    color: #333;
-}
-.sidebar.collapsed ul {
-    display: none;
-}
-.sidebar.collapsed+.content {
-    margin-left: 0;
-}
-.container {
-    max-width: 2340px;
-    min-width: 2340px;
-    margin: auto;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-top: 30px;
-}
-h1 {
-    font-size: 2em;
-    color: #444;
-    text-align: center;
-    margin-bottom: 1em;
-}
-p {
-    font-size: 1.1em;
-    margin: 8px 0;
-    padding: 10px;
-    border-bottom: 1px solid #e1e1e1;
-}
-p strong {
-    color: #555;
-    font-weight: bold;
-}
-.back-link {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: #fff;
-    border-radius: 5px;
-    text-align: center;
-    text-decoration: none;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
-}
-.back-link:hover {
-    background-color: #0056b3;
-}
-.table-container {
-    font-family: sans-serif;  
-    margin: 20px 0;
-}
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 2000px;
-    max-width: 2000px;
-    font-size: 0.9em;
-    text-align: center;
-    background-color: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-.table td,.table th {
-    padding: 12px;
-    text-align: center;
-}
-.table td input,.table td select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    margin-top: 5px;
-}
-.table th,.table td {
-    padding: 12px 15px;
-    border: 1px solid #ddd;
-}
-.table thead th {
-    background-color: #14cf65;
-    color: #fff;
-    font-weight: bold;
-}       
-.table tbody tr:hover {
-    background-color: #f1f1f1;
-}
-        .search-bar,
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin: 10px 0;
-        }
-        .search-bar input[type="text"] {
-            width: 200px;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            background-color: #51d9ce;
-        }
-        .search-bar button,
-        .pagination a {
-            padding: 8px 12px;
-            margin-left: 5px;
-            background-color: #51d9ce;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .pagination a:hover,
-        .search-bar button:hover {
-            background-color: #0056b3;
-        }
-        .pagination a.pagina-actual {
-    background-color: #3db2a9;
-    font-weight: bold;
-    cursor: default;
-    pointer-events: none; 
-}
-        .acciones a {
-            padding: 5px 10px;
-            color: white;
-            text-decoration: none;
-            margin-right: 5px;
-            border-radius: 4px;
-        }
 
-        .acciones a.editar {
-            background-color: #28a745;
-        }
-
-        .acciones a.eliminar {
-            background-color: #dc3545;
-        }
-
-       
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-       
-        .buscar-btn {
-            background-color: #007bff;
-            size: smaller;
-        }
-
-        .buscar-btn:hover {
-            background-color: #0056b3;
-        }
-      
-        .search_bar input[type="text"] {
-            min-width: 1000px;
-            padding: 8px 12px;
-            width: 70%;
-            border: 1px solid #ddd;
-            border-radius: 5px 0 0 5px;
-            outline: none;
-            transition: box-shadow 0.3s ease;
-            font-size: 16px;
-        }
-
-        .search_bar input[type="text"]:focus {
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-            border-color: #007bff;
-        }
-
-       
-        .search_bar {
-            display: flex;
-            gap: 5px;
-        }
-
-        .search_bar form {
-            display: flex;
-            align-items: center;
-            gap: 0;
-        }
-
-        .search_bar button {
-            border-radius: 0 5px 5px 0;
-        }
-
-        .form-control {
-            margin-top: 5px;
-            border-radius: 4px;
-        }
-
-        .buttonmodal {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
-        }
-
-        button[type="submit"]:hover,
-        button[type="button"]:hover {
-            background-color: #0056b3;
-        }
-
-        .modal-content {
-            padding: 20px;
-            border-radius: 8px;
-            background-color: #fff;
-            max-width: 800px;
-            /* Ancho máximo del modal */
-            width: 100%;
-            /* El modal puede ocupar todo el ancho disponible, pero sin exceder el máximo */
-            position: relative;
-            /* Necesario para posicionar el botón de cierre */
-        }
-
-        .modal-content .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            right: 10px;
-            top: 5px;
-        }
-
-        .modal-content .close:hover,
-        .modal-content .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .modal {
-            display: flex;
-            justify-content: center;
-            
-            align-items: center;
-           
-            display: none;
-           
-            position: fixed;
-           
-            z-index: 1;
-           
-            left: 0;
-            top: 0;
-            width: 100%;
-           
-            height: 100%;
-        
-            overflow: auto;
-       
-            background-color: rgba(0, 0, 0, 0.4);
-      
-        }
-
-        .container h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .table-containerr {
-            text-align: center;
-            width: 100%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            font-family: Arial, sans-serif;
-        }
-
-
-        .table-containerr th {
-            background-color: #70d199;
-            color: white;
-            text-align: center;
-            padding: 12px;
-            font-weight: bold;
-        }
-
-       
-        .table-containerr td {
-            background-color: #f9f9f9;
-       
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-      
-        }
-
-    
-        .table-containerr tr:hover {
-            background-color: #f1f1f1;
-            
-        }
-
-        
-        .table-containerr td:first-child {
-            font-weight: bold;
-            color: #333;
-         
-        }
-
-
-        .table-containerr td:last-child {
-            text-align: center;
-        }
-
-        .btn-small {
-            font-size: 14px;
- 
-            padding: 4px 8px;
-    
-            height: 30px;
-      
-            border-radius: 4px;
-   
-            min-width: 85px;
-        }
-            
-    .agregar-btn {
-    padding: 13px 20px;
-    font-size: 16px;
-    color: #fff;
-    background-color: #14cf65;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    align-self: center; /* Asegura la alineación vertical */
-}
-
-.agregar-btn:hover {
-    background-color: #0056b3;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
-
-.filtros {
-    display: inline-flex;
-    justify-content: left;
-    align-items: center;
-    vertical-align: middle;
-    gap: 15px;
-    margin: 20px auto;
-    padding: 14px 20px;
-    background-color: #f9f9f9; /* Fondo claro */
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave */
-}
-
-.filtros label {
-    font-size: 18px;
-    color: #555;
-    font-weight: bold;
-}
-
-.filtros select {
-    padding: 10px 15px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #fff;
-    color: #333;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-
-.filtros select:focus {
-    border-color: #007bff;
-    outline: none; /* Sin borde adicional */
-    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
-}
-
-/* Responsive: Ajusta el diseño en pantallas pequeñas */
-@media (max-width: 768px) {
-    .filtros {
-        flex-direction: column;
-        gap: 10px;
-    }
-}
-
-
-        </style>
         <script>
         (function () {
             const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
@@ -588,21 +122,27 @@ p strong {
             <h2>Panel de Control</h2>
 
             <ul>
-                <li><a href="../Vista/VistaLibros.php" class="active">Lista de Libros</a></li>
-                <li><a href="../Vista/Insertar.php">Insertar Libro</a></li>
-                <li><a href="../Vista/VistaPrestamos.php">Libros Prestados</a></li>
-                <br>
-            <br>
+            <li><a href="../Vista/VistaLibros.php" class="active">Libros</a></li>
+            <li><a href="../Vista/VistaPeriodicos.php">Periodicos</a></li>
+            <li><a href="../Vista/VistaRevistas.php">Revistas</a></li>
+                <li><a href="../Vista/VistaPrestamos.php">Prestamos</a></li>
+                <li><a href="../Vista/Insertar.php" >Insertar Libro</a></li>
+                <li><a href="../Vista/Insertrevista.php" >Insertar Revista</a></li>
+                <li><a href="../Vista/Insertperiodico.php" >Insertar Periodico</a></li>
             <br>
             <img src="../imagen/logo-blanco.png" alt="Logo de la Biblioteca" class="logo">
             </ul>
         </div>
 
         <div class="content">
-            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-
+            <button class="toggle-btn" >☰</button>
+           
             <div class="container">
-                <h1>Listado de Libros</h1>
+            <a href="VistaRevistas.php" class="back-link">Revistas</a> 
+            <a href="VistaPeriodicos.php" class="back-link">Periodicos</a>
+                <h1><strong>Listado de Libros</strong></h1>
+                <a href="../Controlador/exportarLibros.php" class="btn btn-success">📥 Exportar Libros a Excel</a>
+          
                 <div class="search_bar">
                     <form method="GET" action="VistaLibros.php">
                         <input type="text" name="busqueda"
@@ -611,6 +151,22 @@ p strong {
 
                         <input type="hidden" name="filtros"
                             value="<?php echo isset($_GET['filtros']) ? htmlspecialchars($_GET['filtros']) : ''; ?>">
+                        <input type="hidden" name="pagina" value="1">
+<div class="filtro-area">
+                        <select name="filtro_area" class="filtro-area">
+        <option value="">Todas las áreas</option>
+        <option value="bilingue" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == 'bilingue') echo 'selected'; ?>>Literatura Bilingüe (LB/BL)</option>
+        <option value="00-99" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == '00-99') echo 'selected'; ?>>00-99 Generalidades</option>
+        <option value="100-199" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == '100-199') echo 'selected'; ?>>100-199 Filosofía y Psicología</option>
+        <option value="200-299" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == '200-299') echo 'selected'; ?>>200-299 Religión</option>
+        <option value="300-399" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == '300-399') echo 'selected'; ?>>300-399 Ciencias Sociales</option>
+        <option value="400-499" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == '400-499') echo 'selected'; ?>>400-499 Lenguas</option>
+        <option value="500-599" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == '500-599') echo 'selected'; ?>>500-599 Ciencias Naturales</option>
+        <option value="600-699" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == '600-699') echo 'selected'; ?>>600-699 Tecnología</option>
+        <option value="700-799" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == '700-799') echo 'selected'; ?>>700-799 Arte</option>
+        <option value="800-899" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == '800-899') echo 'selected'; ?>>800-899 Literatura</option>
+        <option value="900-999" <?php if(isset($_GET['filtro_area']) && $_GET['filtro_area'] == '900-999') echo 'selected'; ?>>900-999 Historia y Geografía</option>
+    </select></div>
                         <input type="hidden" name="pagina" value="1">
 
                         <button type="submit" class="btn buscar-btn">Buscar</button>
@@ -638,7 +194,7 @@ p strong {
                     </form>
                 </div>
 
-                <button type="button" class="btn agregar-btn" onclick="window.location.href='Insertar.php?pagina=<?php echo $paginaActual; ?>';">Agregar NuevoLibro</button>
+                <button type="button" class="btn agregar-btn" onclick="window.location.href='Insertar.php?pagina=<?php echo $paginaActual; ?>';">Agregar Nuevo Libro</button>
 
 <div class="pagination">
                     <?php
@@ -655,19 +211,24 @@ if ($rangoFin - $rangoInicio < 4) {
     }
 }
 
-function crearEnlace($pagina, $paginaActual, $busqueda = '', $filtroSeleccionado = '', $texto = null) {
+function crearEnlace($pagina, $paginaActual, $busqueda = '', $filtroSeleccionado = '', $texto = null, $filtro_area = '') {
     if (isset($_GET['busqueda']) && empty($busqueda)) {
         $busqueda = $_GET['busqueda'];
     }
     if (isset($_GET['filtros']) && empty($filtroSeleccionado)) {
         $filtroSeleccionado = $_GET['filtros'];
     }
+    if (empty($filtro_area) && isset($_GET['filtro_area'])) {
+        $filtro_area = $_GET['filtro_area'];
+    }
 
     $queryParams = http_build_query([
         'pagina' => $pagina,
         'busqueda' => $busqueda,
         'filtros' => $filtroSeleccionado,
+        'filtro_area' => $filtro_area
     ]);
+
 
     $estilo = $pagina == $paginaActual ? 'class="pagina-actual"' : '';
     $texto = $texto ?? $pagina; 
@@ -676,46 +237,52 @@ function crearEnlace($pagina, $paginaActual, $busqueda = '', $filtroSeleccionado
 }
 ?>
                     <?php if ($paginaActual > 1): ?>
-                    <?= crearEnlace(1, $paginaActual, $busqueda, $filtroSeleccionado, 'Primero') ?>
-                    <?= crearEnlace($paginaActual - 1, $paginaActual, $busqueda, $filtroSeleccionado, 'Anterior') ?>
+                    <?= crearEnlace(1, $paginaActual, $busqueda, $filtroSeleccionado, 'Primero', $filtro_area) ?>
+                    <?= crearEnlace($paginaActual - 1, $paginaActual, $busqueda, $filtroSeleccionado, 'Anterior', $filtro_area) ?>
                     <?php endif; ?>
 
                     <?php for ($i = $rangoInicio; $i <= $rangoFin; $i++): ?>
-                    <?= crearEnlace($i, $paginaActual, $busqueda, $filtroSeleccionado) ?>
+                    <?= crearEnlace($i, $paginaActual, $busqueda, $filtroSeleccionado, null, $filtro_area) ?>
                     <?php endfor; ?>
 
                     <?php if ($paginaActual < $totalPaginas): ?>
-                    <?= crearEnlace($paginaActual + 1, $paginaActual, $busqueda, $filtroSeleccionado, 'Siguiente') ?>
-                    <?= crearEnlace($totalPaginas, $paginaActual, $busqueda, $filtroSeleccionado, 'Último') ?>
+                    <?= crearEnlace($paginaActual + 1, $paginaActual, $busqueda, $filtroSeleccionado, 'Siguiente', $filtro_area) ?>
+                    <?= crearEnlace($totalPaginas, $paginaActual, $busqueda, $filtroSeleccionado, 'Último', $filtro_area) ?>
                     <?php endif; ?>
                 </div>
 
-                <?php if (count($libros) > 0): ?>
+                <?php $librosUnicos = [];
+foreach ($libros as $libro) {
+    if (!isset($librosUnicos[$libro['ID']])) {
+        $librosUnicos[$libro['ID']] = $libro;
+    }
+}
+if (count($libros) > 0): ?>
                 <div class="table-container">
                     <table class="table">
                         <thead>
                             <tr>
                                 <th style="min-width: 100px; max-width: 100px;"><strong>Préstamos</strong></th>
-                                <th style="min-width: 40px;  max-width: 40px"><strong>ID</strong></th>
-                                <th style="min-width: 60px;  max-width:60px"><strong>IDextra</strong></th>
-                                <th style="min-width: 90px;  max-width: 90px"><strong>Código</strong></th>
+                                <th style="min-width: 50px;  max-width: 50px"><strong>Item</strong></th>
+                                <th style="min-width: 115px;  max-width:115px"><strong>Código</strong></th>
+                                <th style="min-width: 130px;  max-width: 130px"><strong>Signatura</strong></th>
                                 <th style="min-width: 115px;  max-width:115px"><strong>Actividad</strong></th>
                                 <th style="min-width: 250px;  max-width:250px"><strong>Título</strong></th>
                                 <th style="min-width: 150px;  max-width:150px"><strong>Autor</strong></th>
-                                <th style="min-width: 40px; max-width:40px" ><strong> Estado</strong></th>
+                                <th style="min-width: 150px; max-width:150px" ><strong>Responsabilidad</strong></th>
+                                <th style="min-width: 160px; max-width:160px"><strong>ISBN</strong></th>
                                 <th style="min-width: 70px; max-width:70px"><strong>Editorial</strong></th>
-                                <th style="min-width: 70px; max-width:70px"><strong>Área</strong></th>
-                                <th style="min-width: 40px; max-width:40px"><strong>Medio</strong></th>
-                                <th style="min-width: 80px; max-width:80px"><strong>Clase</strong></th>
-                                <th style="min-width: 80px; max-width:80px"><strong>Sección</strong></th>
-                                <th style="min-width: 300px; max-width:300px"><strong>Temas</strong></th>
-                                <th style="min-width: 300px; max-width:300px" ><strong>Temas2</strong></th>
+                                <th style="min-width: 40px; max-width:40px" ><strong> Estado</strong></th>
+                                <th style="min-width: 100px; max-width:100px"><strong>Colección</strong></th>
+                                <th style="min-width: 70px; max-width:70px"><strong>Ubicación</strong></th>
+                                <th style="min-width: 80px; max-width:80px"><strong>Soporte</strong></th>
+                                <th style="min-width: 300px; max-width:350px"><strong>Descriptores</strong></th>
                                 <th style="min-width: 50px ; max-width:50px" ><strong>Acciones</strong></th>
                             </tr>
                         </thead>
                         <tbody>
 <?php 
-               foreach ($libros as $libro): 
+               foreach ($librosUnicos as $libro): 
 
                 $actividad = $actividadesModelo->verActividadID($libro['Actividad']);
                 $nombreActividad=!empty($actividad) ? $actividad [0]['disponibilidad']:'Desconocido';
@@ -761,10 +328,14 @@ function crearEnlace($pagina, $paginaActual, $busqueda = '', $filtroSeleccionado
                                         style="width: 28px; height: 28px; display: inline-flex; justify-content: center; align-items: center; background-color:  <?php echo $color; ?>; cursor: pointer;"
                                         title="<?php echo htmlspecialchars($nombrePrest, ENT_QUOTES, 'UTF-8'); ?>">
                                     </div>
+                                    <input type="hidden" id="tipoMaterial" name="tipoMaterial" value="libro"> <!-- libro, revista, periodico -->
+
                                 </td>
-                                <td style="min-width: 60px; max-width: 60px; font-size:15px;"><strong><?php echo $libro['ID']; ?></strong</td>
-                                <td style="min-width: 75px; max-width: 75px;"><?php echo $libro['IDLIB']; ?></td>
-                                <td style="min-width: 90px; max-width: 90px;"><?php echo $libro['Codigo']; ?></td>
+                                <td style="min-width: 75px; max-width: 75px; font-size:15px; background-color: <?php echo isset($libro['coincidencia_indice']) && $libro['coincidencia_indice'] ? 'yellow' : 'transparent'; ?>">
+                                <strong><?php echo htmlspecialchars($libro['ID']); ?></strong>
+</td>
+                                <td style="min-width: 115px; max-width: 115px;"><?php echo $libro['IDLIB']; ?></td>
+                                <td style="min-width: 130px; max-width: 130px;"><?php echo $libro['Codigo']; ?></td>
 
                                 <td style="min-width: 115px; max-width: 115px;">
 
@@ -777,16 +348,16 @@ function crearEnlace($pagina, $paginaActual, $busqueda = '', $filtroSeleccionado
                                     <a href="VistaDetalleLibro.php?id=<?php echo $libro['ID']; ?>">
                                         <?php echo $libro['Titulo']; ?>
                                 </td>
-                                <td style="min-width: 100px; max-width: 100px;"><?php echo $nombreAutor; ?></td>
-                                <td style="min-width: 100px; max-width: 100px;"><?php echo $nombreEstado; ?></td>
+                                <td style="min-width: 100px; max-width: 150px;"><?php echo $nombreAutor; ?></td>
+                                <td style="min-width: 100px; max-width: 150px;"><?php echo $libro['Temas2']; ?></td>
+                                <td style="min-width: 160px; max-width: 160px;"><?php echo $libro['ISBN']; ?></td>
                                 <td style="min-width: 140px; max-width: 140px;"><?php echo $nombreEditorial; ?></td>
+                                <td style="min-width: 100px; max-width: 100px;"><?php echo $nombreEstado; ?></td>
+                                <td style="min-width: 120px; max-width: 120px;"><?php echo $nombreSeccion; ?></td>
                                 <td style="min-width: 130px; max-width: 130px;"><?php echo $nombreArea; ?></td>
-                                <td style="min-width: 100px; max-width: 100px;"><?php echo $nombreMedio; ?></td>
-                                <td style="min-width: 110px; max-width: 110px;"><?php echo $nombreClase; ?></td>
-                                <td style="min-width: 100px; max-width: 100px;"><?php echo $nombreSeccion; ?></td>
-                                <td style="min-width: 400px; max-width:400px"><?php echo $libro['Temas']; ?></td>
-                                <td style="min-width: 100px; max-width: 100px;"><?php echo $libro['Temas2']; ?></td>
-                                <td style="min-width: 85px; max-width: 85px;">
+                                <td style="min-width: 120px; max-width: 120px;"><?php echo $nombreClase; ?></td>
+                                <td style="min-width: 100px; max-width:400px"><?php echo $libro['Temas']; ?></td>
+                                <td style="min-width: 85px; max-width: 85px; background-color: <?php echo isset($libro['coincidencia_indice']) && $libro['coincidencia_indice'] ? 'yellow' : 'transparent'; ?>">
                                     <a href="Actualizar.php?id=<?php echo $libro['ID']; ?>">Editar</a> |
                                     <a href="Eliminar.php?id=<?php echo $libro['ID']; ?>" class="eliminar-libro"
                                         onclick="">Eliminar</a>
@@ -870,12 +441,30 @@ function crearEnlace($pagina, $paginaActual, $busqueda = '', $filtroSeleccionado
                                             </td>
                                         </tr>
                                         <tr>
+                        <th><label for="tipoPrestamo">Tipo de Préstamo:</label></th>
+                        <td>
+                            <select id="tipoPrestamo" name="tipoPrestamo" onchange="mostrarCamposExternos()" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="0">Interno</option>
+                                <option value="1">Externo</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr id="filaContacto" style="display: none;">
+                        <th><label for="contacto">Contacto:</label></th>
+                        <td><input type="text" id="contacto" name="contacto"></td>
+                    </tr>
+                    <tr id="filaTiempo" style="display: none;">
+                        <th><label for="tiempo">Días de préstamo:</label></th>
+                        <td><input type="number" id="tiempo" name="tiempo" min="1"></td>
+                    </tr>
+                                        <tr>
                                             <th><label for="fecha">Fecha:</label></th>
                                             <td><input type="date" id="fecha" name="fecha" required></td>
                                         </tr>
                                     </table>
                                     <button type="button" class="buttonmodal" id="botonAgregarPrestamo"
-                                        onclick="agregarPrestamos(1)">Agregar Préstamo</button>
+                                        >Agregar Préstamo</button>
 
                             </div>
                             <div id="detallesPrestamo" style="display: none;">
@@ -900,13 +489,17 @@ function crearEnlace($pagina, $paginaActual, $busqueda = '', $filtroSeleccionado
 
                                             <th>Fecha de Préstamo</th>
 
+                                            <th>Contacto</th>
+
+                                            <th>Días restantes</th>
+
                                         </tr>
                                     </thead>
                                     <tbody id="contenidoPrestamo">
                                     </tbody>
                                 </table>
-                                <button type="button" class="buttonmodal" id="botonDevolverPrestamo"
-                                    style="display: none;" onclick="EliminarPrestamos(0)">Marcar como Devuelto</button>
+                                <button type="button" class="buttonmodal" id="botonDevolverPrestamo" style="display: none;" onclick="EliminarPrestamos(0)">Marcar como Devuelto</button>
+                                <button type="button" class="buttonmodal" id="botonExtenderPrestamo" style="display: none;" onclick="extenderPrestamo()" >Extender Tiempo</button>
 
                             </div>
                         </div>
@@ -949,22 +542,22 @@ function crearEnlace($pagina, $paginaActual, $busqueda = '', $filtroSeleccionado
                         <thead>
                             <tr>
                                 <center>
-                                    <th>Prestamos</th>
-                                    <th>ID</th>
-                                    <th>IDextra</th>
-                                    <th>Código</th>
-                                    <th>Actividad</th>
-                                    <th>Título</th>
-                                    <th>Autor</th>
-                                    <th>Estado</th>
-                                    <th>Editorial</th>
-                                    <th>Area</th>
-                                    <th>Medio</th>
-                                    <th>Clase</th>
-                                    <th>Sección</th>
-                                    <th>Temas</th>
-                                    <th>Temas2</th>
-                                    <th>Acciones</th>
+                                <th style="min-width: 100px; max-width: 100px;"><strong>Préstamos</strong></th>
+                                <th style="min-width: 40px;  max-width: 40px"><strong>Item</strong></th>
+                                <th style="min-width: 60px;  max-width:60px"><strong>Código</strong></th>
+                                <th style="min-width: 90px;  max-width: 90px"><strong>Signatura</strong></th>
+                                <th style="min-width: 115px;  max-width:115px"><strong>Actividad</strong></th>
+                                <th style="min-width: 250px;  max-width:250px"><strong>Título</strong></th>
+                                <th style="min-width: 150px;  max-width:150px"><strong>Autor</strong></th>
+                                <th style="min-width: 150px; max-width:150px" ><strong>Responsabilidad</strong></th>
+                                <th style="min-width: 40px; max-width:40px" ><strong> Estado</strong></th>
+                                <th style="min-width: 70px; max-width:70px"><strong>Editorial</strong></th>
+                                <th style="min-width: 70px; max-width:70px"><strong>Ubicación</strong></th>
+                                <th style="min-width: 40px; max-width:40px"><strong>Medio</strong></th>
+                                <th style="min-width: 80px; max-width:80px"><strong>Soporte</strong></th>
+                                <th style="min-width: 100px; max-width:100px"><strong>Colección</strong></th>
+                                <th style="min-width: 300px; max-width:300px"><strong>Descriptores</strong></th>
+                                <th style="min-width: 50px ; max-width:50px" ><strong>Acciones</strong></th>
                             </tr>
                 </center>
                 </thead>
@@ -999,6 +592,8 @@ function crearEnlace($pagina, $paginaActual, $busqueda = '', $filtroSeleccionado
             <script>
             $(document).ready(function() {
                 $('select').select2();
+
+
 
 
                 document.querySelector('.search_bar form').addEventListener('submit', function(event) {
@@ -1046,6 +641,50 @@ function crearEnlace($pagina, $paginaActual, $busqueda = '', $filtroSeleccionado
         localStorage.setItem('sidebar-collapsed', isNowCollapsed);
     });
 });
+
+</script>
+<script>
+    function mostrarCamposExternos() {
+    const tipoPrestamo = document.getElementById('tipoPrestamo').value;
+    const filaContacto = document.getElementById('filaContacto');
+    const filaTiempo = document.getElementById('filaTiempo');
+
+    if (tipoPrestamo === "1") { // Externo
+        filaContacto.style.display = "table-row";
+        filaTiempo.style.display = "table-row";
+    } else { // Interno
+        filaContacto.style.display = "none";
+        filaTiempo.style.display = "none";
+    }
+}
+
+function extenderPrestamo() {
+    let idPrestamo = document.getElementById('idPrestamo').value;
+    let diasExtra = prompt("Ingrese la cantidad de días adicionales:");
+
+    if (diasExtra && !isNaN(diasExtra) && diasExtra > 0) {
+        $.ajax({
+            url: '../Controlador/extenderPrestamo.php',
+            method: 'POST',
+            data: { idPrestamo: idPrestamo, diasExtra: diasExtra }, // ✅ Variable corregida
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    alert("El préstamo ha sido extendido exitosamente.");
+                    location.reload(); // Recargar la página para actualizar la información
+                } else {
+                    alert("Error: " + response.error);
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Error al extender el préstamo:", textStatus, errorThrown);
+            }
+        });
+    } else {
+        alert("Ingrese un número válido de días.");
+    }
+}
+
 
 </script>
 

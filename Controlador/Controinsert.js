@@ -1,3 +1,21 @@
+function mostrarSegundoAutor() {
+    document.getElementById('segundoAutorRow').style.display = 'table-row';
+}
+
+function mostrarTercerAutor() {
+    document.getElementById('tercerAutorRow').style.display = 'table-row';
+}
+
+function mostrarCuartoAutor() {
+    document.getElementById('cuartoAutorRow').style.display = 'table-row';
+}
+
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('collapsed');
+}
+
 $(document).ready(function() {
 
     function openModal(modalId) {
@@ -27,12 +45,12 @@ $(document).ready(function() {
                 if (response.success) {
                     alert('Libro agregado exitosamente.');
                     $('#form-libro')[0].reset();
-                    actualizarListaLibros(response.libros);
+
 
                     var paginaActual = response.paginaActual || 1;
                     window.location.href = 'VistaLibros.php?pagina=' + paginaActual;
                 } else {
-                    alert('Error al agregar el libro: ' + response.message);
+                    alert('Error al agregar el libro1: ' + response.message);
                 }
             },
             error: function(xhr, status, error) {
@@ -69,14 +87,12 @@ $(document).ready(function() {
             url: '../Controlador/AgregarAutor.php',
             method: 'POST',
             data: { nombreAutor: nuevoAutor },
+            dataType: 'json',
             success: function(response) {
-                alert('Autor agregado exitosamente. Vamos a recargar esta pagina');
+                alert('Autor agregado exitosamente.');
                 $('#autorID').append('<option value="' + response.id + '" data-nombre="' + response.nombre + '">' + response.nombre + '</option>');
-
                 closeModal('autorModal');
-
-                window.location.href = 'Insertar.php';
-
+                location.reload();
             },
             error: function() {
                 alert('Error al agregar autor');
@@ -84,8 +100,49 @@ $(document).ready(function() {
         });
     }
 
+    function agregarAutor2() {
+        var nuevoAutor2 = $('#nuevoAutor2').val();
+
+        $.ajax({
+            url: '../Controlador/AgregarAutor2.php',
+            method: 'POST',
+            data: { nombreAutor: nuevoAutor2 },
+            dataType: 'json',
+            success: function(response) {
+                alert('Autor corporativo agregado exitosamente.');
+                $('#autorID2').append('<option value="' + response.id + '" data-nombre="' + response.nombre + '">' + response.nombre + '</option>');
+                closeModal('autor2Modal');
+                location.reload();
+            },
+            error: function() {
+                alert('Error al agregar autor corporativo');
+            }
+        });
+    }
+
+
+    function agregarUbicacion() {
+        var nuevaubicacion = $('#nuevaubicacion').val();
+
+        $.ajax({
+            url: '../Controlador/Agregarubicacion.php',
+            method: 'POST',
+            data: { nombreUbicacion: nuevaubicacion },
+            dataType: 'json',
+            success: function(response) {
+                alert('Ubicación agregada exitosamente.');
+                closeModal('UbicacionModal');
+                location.reload();
+            },
+            error: function() {
+                alert('Error al agregar autor corporativo');
+            }
+        });
+    }
+
+
     function agregarEditorial() {
-        var nuevaEditorial = $('#tipoactividad').val();
+        var nuevaEditorial = $('#nuevaEditorial').val();
 
 
         $.ajax({
@@ -96,8 +153,8 @@ $(document).ready(function() {
                 try {
                     const jsonResponse = JSON.parse(response);
                     if (jsonResponse.success) {
-                        alert('Préstamo agregado exitosamente');
-                        closeModal('prestamoModal');
+                        alert('Editorial agregada exitosamente');
+                        closeModal('editorialModal');
                         location.reload();
                     } else {
                         alert('Error: ' + (jsonResponse.error || 'Ocurrió un problema inesperado.'));
@@ -117,5 +174,7 @@ $(document).ready(function() {
     window.openModal = openModal;
     window.closeModal = closeModal;
     window.agregarAutor = agregarAutor;
+    window.agregarUbicacion = agregarUbicacion;
+    window.agregarAutor2 = agregarAutor2;
     window.agregarEditorial = agregarEditorial;
 });

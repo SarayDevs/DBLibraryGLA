@@ -6,41 +6,68 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 $response = [];
-
+error_log(print_r($_POST, true));
 try {
     include_once '../Modelo/Conexion.php';
     include_once '../Modelo/Datosprestamos.php';
 
     $Prestamos = new misPrestamos();
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        // Obtener los datos enviados por el formulario
-        $libprest = $_POST['libprest'] ?? null;
-        $estadoprest = $_POST['estadoprest'] ?? null;
-        $nombrep = $_POST['nombrep'] ?? null;
-        $tipoperson = $_POST['tipoperson'] ?? null;
-        $fecha = $_POST['fecha'] ?? null;
-        $DEVOLUCION= null;
+    $conexion = new Conexion();
+    $pdo = $conexion;
 
-        // Validación de campos
-        if (!$libprest || !$estadoprest || !$nombrep || !$tipoperson || !$fecha) {
-            $response['success'] = false;
-            $response['error'] = 'Faltan campos obligatorios';
-        } else if ($Prestamos->agregarPrestamos($libprest, $estadoprest, $nombrep, $tipoperson, $fecha, $DEVOLUCION)) {
-            $response['success'] = true;
-        } else {
-            $response['success'] = false;
-            $response['error'] = 'Error al agregar préstamo en la base de datos';
+
+    if (isset($_POST['libprest']) && isset($_POST['nombrep']) && isset($_POST['fecha']) && isset($_POST['tipoPrestamo'])) {
+        $libprest = $_POST['libprest'];
+        $estadoprest = $_POST['estadoprest'];
+        $tipoprest = $_POST['tipoPrestamo'];
+        $nombrep = $_POST['nombrep'];
+        $tipoperson = $_POST['tipoperson'];
+        $fecha = $_POST['fecha'];
+       
+        $DEVOLUCION = null;
+
+        $pdo->beginTransaction(); // Iniciar transacción
+
+        // Insertar en la tabla préstamos
+        $idPrestamo = $Prestamos->agregarPrestamos($libprest, $estadoprest, $tipoprest, $nombrep,
+         $tipoperson,  $fecha, $DEVOLUCION);
+
+        if (!$idPrestamo) {
+            throw new Exception('Error al agregar el préstamo en la base de datos');
         }
+
+        // Si el préstamo es externo, agregarlo en externoprest
+        if ($tipoprest == "1") {
+            $contacto = $_POST['contacto'] ?? null;
+            $tiempo = $_POST['tiempo'] ?? null;
+
+            if (!$contacto || !$tiempo) {
+                throw new Exception('Faltan datos obligatorios para préstamo externo');
+            }
+
+            $sql = "INSERT INTO externoprest (idprestamo, tipoprest, idlibro, nombre, persona, contacto, tiempo, fecha_inicio )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$idPrestamo, $tipoprest, $libprest, $nombrep, $tipoperson, $contacto, $tiempo, $fecha]);
+
+            if ($stmt->rowCount() == 0) {
+                throw new Exception('Error al agregar préstamo externo');
+            }
+        }
+
+        $pdo->commit(); // Confirmar transacción
+        $response['success'] = true;
+
     } else {
         $response['success'] = false;
-        $response['error'] = 'Método no permitido';
+        $response['error'] = 'Faltan campos obligatorios';
     }
 } catch (Exception $e) {
+    $pdo->rollBack(); // Revertir cambios si hay error
     $response['success'] = false;
-    $response['error'] = 'Excepción capturada: ' . $e->getMessage();
+    $response['error'] = 'Error: ' . $e->getMessage();
 }
 
-// Retornar la respuesta en formato JSON
 echo json_encode($response);
 exit;
 ?>

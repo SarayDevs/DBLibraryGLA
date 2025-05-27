@@ -1,53 +1,53 @@
 $(document).ready(function() {
+            console.log("Script Controprest.js cargado correctamente");
 
-    $('#botonAgregarPrestamo').click(function() {
-        const idLibro = $('#libprest').val();
-        actualizarEstadoLibro(idLibro, 1);
-    });
+            $('#botonAgregarPrestamo').click(function() {
+                agregarPrestamos(1); // Llamar la función y pasarle el estado
 
-    $('#botonDevolverPrestamo').click(function() {
-        const idLibro = $('#libprest').val();
-        actualizarEstadoLibro(idLibro, 0);
-    });
+                // Escuchar cuando el préstamo se procese con éxito
+                $(document).on('prestamoExitoso', function(event, idLibro) {
+                    actualizarEstadoLibro(idLibro, 1);
+                });
+            });
 
+            $('#botonDevolverPrestamo').click(function() {
+                const idLibro = $('#libprest').val();
+                actualizarEstadoLibro(idLibro, 0);
 
+            });
 
-    function openModal(modalId, idLibro, tituloLibro, siPrestado) {
-        const modal = document.getElementById(modalId);
+            function openModal(modalId, idLibro, tituloLibro, siPrestado) {
+                const modal = document.getElementById(modalId);
 
+                document.getElementById('idescondido').value = idLibro;
+                document.getElementById("libprest").value = idLibro;
+                document.getElementById("idLibro").value = idLibro;
+                document.getElementById("tituloLibro").value = tituloLibro;
 
-        document.getElementById('idescondido').value = idLibro;
-        document.getElementById("libprest").value = idLibro;
-        document.getElementById("idLibro").value = idLibro;
-        document.getElementById("tituloLibro").value = tituloLibro;
+                const agregarPrestamoCampos = document.getElementById("agregarPrestamoCampos");
+                if (siPrestado == 1) {
+                    agregarPrestamoCampos.style.display = "none";
+                    $.ajax({
+                                url: '../Controlador/verPrestamoPorLibro.php',
+                                method: 'GET',
+                                data: { id: idLibro },
+                                dataType: 'json',
+                                success: function(response) {
+                                        console.log("Respuesta del servidor:", response);
 
-        const agregarPrestamoCampos = document.getElementById("agregarPrestamoCampos");
-        if (siPrestado == 1) {
-            agregarPrestamoCampos.style.display = "none";
-            $.ajax({
-                url: '../Controlador/verPrestamoPorLibro.php',
-                method: 'GET',
-                data: { id: idLibro },
-                dataType: 'json',
-                success: function(response) {
-                    console.log(response);
+                                        if (response.success) {
+                                            const prestamo = response.prestamo;
 
-                    if (response.success) {
-                        const prestamo = response.prestamo;
+                                            if (!prestamo) {
+                                                console.error("No se encontró el préstamo en la respuesta");
+                                                return;
+                                            }
 
+                                            const contenidoPrestamo = document.getElementById("contenidoPrestamo");
+                                            contenidoPrestamo.innerHTML = '';
 
-                        if (!prestamo) {
-                            console.error("No se encontró el préstamo en la respuesta");
-                            return;
-                        }
-
-                        const contenidoPrestamo = document.getElementById("contenidoPrestamo");
-                        contenidoPrestamo.innerHTML = '';
-
-
-
-                        const fila = document.createElement("tr");
-                        fila.innerHTML = `
+                                            const fila = document.createElement("tr");
+                                            fila.innerHTML = `
                             <td>${prestamo.IDPREST}</td>
                             <td>${prestamo.libprest}</td>
                             <td><a href="VistaDetalleLibro.php?id=${prestamo.libprest}">${document.getElementById('tituloLibro').value}</a></td>
@@ -61,35 +61,39 @@ $(document).ready(function() {
                             prestamo.tipoperson === 5 ? ' Invitado' : ' Otros'
                             }</td>
                             <td>${prestamo.FECHA}</td>
+                            ${prestamo.contacto ? `<td> ${prestamo.contacto}</td>` : ''}
+                            ${prestamo.tiempo ? `<td> ${prestamo.tiempo} días</td>` : ''}
                         `;
                         contenidoPrestamo.appendChild(fila);
-
+    
                         document.getElementById("idPrestamo").value = prestamo.IDPREST;
-
                         document.getElementById("detallesPrestamo").style.display = "block";
                         document.getElementById("botonDevolverPrestamo").style.display = "inline-block";
+                        if (prestamo.contacto) {
+                            document.getElementById("botonExtenderPrestamo").style.display = "inline-block";
+                        } else {
+                            document.getElementById("botonExtenderPrestamo").style.display = "none";
+                        }
+    
                     } else {
                         alert(response.error);
                     }
-
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.error("Error AJAX al obtener detalles del préstamo:", textStatus, errorThrown);
+                    console.log("Respuesta del servidor:", jqXHR.responseText);
                 }
             });
+    
         } else {
-
             agregarPrestamoCampos.style.display = "block";
             document.getElementById("detallesPrestamo").style.display = "none";
             document.getElementById("botonAgregarPrestamo").style.display = "inline-block";
             document.getElementById("botonDevolverPrestamo").style.display = "none";
         }
-
-
+    
         modal.style.display = "block";
-
     }
-
 
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
@@ -97,8 +101,7 @@ $(document).ready(function() {
             modal.style.display = "none";
         }
     }
-
-
+    
 
     function agregarPrestamos(estadoPrestamo) {
         const form = document.getElementById('form-prestamo');
@@ -109,48 +112,61 @@ $(document).ready(function() {
         const nombrep = document.getElementById('nombrep').value;
         const tipoperson = document.getElementById('tipoperson').value;
         const fecha = document.getElementById('fecha').value;
+        const tipoPrestamo = document.getElementById('tipoPrestamo').value;
+        const tipoMaterial = document.getElementById('tipoMaterial').value;
+formData.append('tipoMaterial', tipoMaterial);
 
-        if (!libprest || !nombrep || !tipoperson || !fecha) {
-            alert('Por favor, complete todos los campos.');
+
+        console.log("Valor seleccionado de tipoperson:", tipoperson);
+
+        // Si es externo, obtener los datos adicionales
+        if (tipoPrestamo === "1") {
+            const contacto = document.getElementById('contacto').value;
+            const tiempo = document.getElementById('tiempo').value;
+
+            if (!contacto || !tiempo) {
+                alert('Debe llenar los campos de contacto y días de préstamo para préstamos externos.');
+                return;
+            }
+
+            formData.append('contacto', contacto);
+            formData.append('tiempo', tiempo);
+        }
+
+        formData.append('tipoPrestamo', tipoPrestamo);
+
+        if (!libprest || !nombrep || !tipoperson || !fecha || !tipoPrestamo) {
+            alert('Por favor, complete todos los campos obligatorios.');
             return;
         }
 
-        const confirmMessage = `
-            ¿Está seguro que desea enviar los siguientes datos?
-            ID del Libro: ${libprest}
-            Título del Libro: ${document.getElementById('tituloLibro').value}
-            Nombre: ${nombrep}
-            Tipo de Persona: ${tipoperson}
-            Fecha: ${fecha}
-        `;
+        $.ajax({
+            url: '../Controlador/AgregarPrestamo.php',
+            method: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function(response) {
+                console.log("Respuesta del servidor:", response);
+                if (response.success) {
+                    alert('Préstamo procesado exitosamente');
+                    closeModal('prestamoModal');
 
-        if (confirm(confirmMessage)) {
-            $.ajax({
-                url: '../Controlador/AgregarPrestamo.php',
-                method: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                dataType: 'json',
-                success: function(response) {
-                    console.log("Respuesta del servidor:", response);
-                    if (response.success) {
-                        alert('Préstamo procesado exitosamente');
-                        closeModal('prestamoModal');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + response.error);
-                    }
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    console.error("Error AJAX:", textStatus, errorThrown);
-                    console.log(jqXHR.responseText);
-                    alert('Error al procesar la solicitud AJAX: ' + textStatus);
+                    // Emitir un evento con el ID del libro
+                    $(document).trigger('prestamoExitoso', [libprest]);
+
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.error);
                 }
-            });
-        } else {
-            alert('El envío ha sido cancelado.');
-        }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Error AJAX:", textStatus, errorThrown);
+                console.log(jqXHR.responseText);
+                alert('Error al procesar la solicitud AJAX.');
+            }
+        });
     }
 
     function EliminarPrestamos(estadoPrestamo) {
@@ -186,13 +202,14 @@ $(document).ready(function() {
         });
     }
 
-    function actualizarEstadoLibro(idLibro, nuevoEstado) {
+    function actualizarEstadoLibro(idLibro, nuevoEstado, tipoMaterial) {
         $.ajax({
             url: '../Controlador/actualizarLibroPrestamo.php',
             method: 'POST',
             data: {
                 id: idLibro,
-                SiPrest: nuevoEstado
+                SiPrest: nuevoEstado,
+                tipoMaterial: tipoMaterial
             },
             dataType: 'json',
             success: function(response) {
@@ -237,7 +254,7 @@ $(document).ready(function() {
 
 
     window.actualizarActividad = actualizarActividad;
-
+    window.extenderPrestamo= extenderPrestamo;
     window.agregarPrestamos = agregarPrestamos;
     window.EliminarPrestamos = EliminarPrestamos;
     window.openModal = openModal;

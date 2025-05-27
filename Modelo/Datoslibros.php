@@ -8,7 +8,44 @@ class misLibros {
         $conexion = new Conexion();
         $arreglo = array();
 
-        $consulta = "SELECT * FROM libros";
+        $consulta = "SELECT 
+    l.ID, 
+    l.IDLIB, 
+    l.Codigo, 
+    l.Titulo, 
+    a.autores AS Autor, 
+    l.Edicion, 
+    l.Costo, 
+    l.Fecha, 
+    e.Etados AS Estado, 
+    o.origenes AS Origen,  
+    ed.editoriales AS Editorial,  
+    l.Area,  
+    m.tipo AS Medio,  
+    c.clases AS Clase,  
+    l.Observacion, 
+    s.secciones AS Seccion,  
+    l.Temas,  
+    act.disponibilidad AS Actividad,  
+    l.ISBN,  
+    l.Ciudad,  
+    l.Colacion,  
+    l.Serie,  
+    l.Dimensiones,  
+    l.Nota,  
+    l.copia,
+    l.Resena
+FROM libros l
+LEFT JOIN autor a ON l.autorID = a.idautor
+LEFT JOIN estado e ON l.Estado = e.IdEst
+LEFT JOIN origen o ON l.Origen = o.idorigen
+LEFT JOIN editorial ed ON l.Editorial = ed.ideditorial
+LEFT JOIN medio m ON l.Medio = m.id
+LEFT JOIN clase c ON l.Clase = c.idclase
+LEFT JOIN seccion s ON l.Seccion = s.idseccion
+LEFT JOIN posibles act ON l.Actividad = act.IDposibles;
+
+         ";
         $modulos = $conexion->prepare($consulta);
         $modulos->execute();
         $total = $modulos->rowCount();
@@ -21,6 +58,7 @@ class misLibros {
         }
         return $arreglo;
     }
+
 
 
     function verLibroID($id = null) {
@@ -49,11 +87,22 @@ class misLibros {
     }
 
    
-    function agregarLibros($IDLIB, $Codigo, $Titulo, $Existe, $autorID, $Autor, $Edicion, $Costo, $Fecha, $Estado, $TipoEstado, $Origen, $TipoOrigen, $Editorial, $TipoEditorial, $Area, $TipoArea, $Medio, $NombreMedio, $Clase, $TipoClase, $Observacion, $Seccion, $TipoSeccion, $Temas, $codinv, $npag, $Fimpresion, $Temas2, $Entrainv, $actividad) {
+    function agregarLibros($IDLIB, $Codigo, $Titulo, $Existe, $autorID,  $Edicion, $Costo, $Fecha, $Estado,  $Origen, 
+     $Editorial,  $Area,  $Medio,  $Clase,  $Observacion, $Seccion, 
+     $Temas, $npag, $Fimpresion, $Temas2, $Entrainv, $actividad, $autorID2, 
+	$ISBN, $Ciudad, $Colacion, $Serie, $Dimensiones, $AsientosSecundarios, $Caratula, $Nota, $copia, $autorID3, $autorID4, $Resena, $autorID5 ) {
+
         try {
             $conexion = new Conexion();
-            $consulta = "INSERT INTO libros (IDLIB, Codigo, Titulo, Existe, autorID, Autor, Edicion, Costo, Fecha, Estado, TipoEstado, Origen, TipoOrigen, Editorial, TipoEditorial, Area, TipoArea, Medio, NombreMedio, Clase, TipoClase, Observacion, Seccion, TipoSeccion, Temas, codinv, npag, Fimpresion, Temas2, Entrainv, Actividad) 
-                         VALUES (:IDLIB, :Codigo, :Titulo, :Existe, :autorID, :autor, :Edicion, :Costo, :Fecha, :Estado, :TipoEstado, :Origen, :TipoOrigen, :Editorial, :TipoEditorial, :Area, :TipoArea, :Medio, :NombreMedio, :Clase, :TipoClase, :Observacion, :Seccion, :TipoSeccion, :Temas, :codinv, :npag, :Fimpresion, :Temas2, :Entrainv, :actividad)";
+            $consulta = "INSERT INTO libros (IDLIB, Codigo, Titulo, Existe, autorID,  Edicion, Costo, Fecha, Estado,  Origen, 
+             Editorial,  Area,  Medio,  Clase,  Observacion, Seccion,  Temas, 
+           npag, Fimpresion, Temas2, Entrainv, Actividad, autorID2, ISBN, Ciudad, Colacion, Serie, Dimensiones, 
+            AsientosSecundarios, Caratula, Nota, copia, autorID3, autorID4, Resena, autorID5) 
+
+                         VALUES (:IDLIB, :Codigo, :Titulo, :Existe, :autorID,  :Edicion, :Costo, :Fecha, :Estado,  :Origen, 
+                          :Editorial,  :Area,  :Medio,  :Clase,  :Observacion, :Seccion, 
+                          :Temas,  :npag, :Fimpresion, :Temas2, :Entrainv, :actividad, :autorID2,  :ISBN, :Ciudad, 
+                         :Colacion, :Serie, :Dimensiones, :AsientosSecundarios, :Caratula, :Nota, :copia, :autorID3, :autorID4, :Resena, :autorID5)";
     
             $stmt = $conexion->prepare($consulta);
     
@@ -63,33 +112,59 @@ class misLibros {
             $stmt->bindParam(':Titulo', $Titulo);
             $stmt->bindParam(':Existe', $Existe);
             $stmt->bindParam(':autorID', $autorID);
-            $stmt->bindParam(':autor', $Autor);
             $stmt->bindParam(':Edicion', $Edicion);
             $stmt->bindParam(':Costo', $Costo);
             $stmt->bindParam(':Fecha', $Fecha);
             $stmt->bindParam(':Estado', $Estado);
-            $stmt->bindParam(':TipoEstado', $TipoEstado);
             $stmt->bindParam(':Origen', $Origen);
-            $stmt->bindParam(':TipoOrigen', $TipoOrigen);
             $stmt->bindParam(':Editorial', $Editorial);
-            $stmt->bindParam(':TipoEditorial', $TipoEditorial);
             $stmt->bindParam(':Area', $Area);
-            $stmt->bindParam(':TipoArea', $TipoArea);
             $stmt->bindParam(':Medio', $Medio);
-            $stmt->bindParam(':NombreMedio', $NombreMedio);
             $stmt->bindParam(':Clase', $Clase);
-            $stmt->bindParam(':TipoClase', $TipoClase);
             $stmt->bindParam(':Observacion', $Observacion);
             $stmt->bindParam(':Seccion', $Seccion);
-            $stmt->bindParam(':TipoSeccion', $TipoSeccion);
             $stmt->bindParam(':Temas', $Temas);
-            $stmt->bindParam(':codinv', $codinv);
             $stmt->bindParam(':npag', $npag);
             $stmt->bindParam(':Fimpresion', $Fimpresion);
             $stmt->bindParam(':Temas2', $Temas2);
             $stmt->bindParam(':Entrainv', $Entrainv);
             $stmt->bindParam(':actividad', $actividad);
-    
+            $stmt->bindParam(':autorID2', $autorID2);
+            $stmt->bindParam(':ISBN', $ISBN);
+            $stmt->bindParam(':Ciudad', $Ciudad);
+            $stmt->bindParam(':Colacion', $Colacion);
+            $stmt->bindParam(':Serie', $Serie);
+            $stmt->bindParam(':Dimensiones', $Dimensiones);
+            $stmt->bindParam(':AsientosSecundarios', $AsientosSecundarios);
+            $stmt->bindParam(':Caratula', $Caratula);
+            $stmt->bindParam(':Nota', $Nota);
+            $stmt->bindParam(':copia', $copia);
+            $stmt->bindParam(':autorID3', $autorID3);
+            $stmt->bindParam(':autorID4', $autorID4);
+            $stmt->bindParam(':Resena', $Resena);
+            $stmt->bindParam(':autorID5', $autorID5);
+
+            if ($autorID2 === null) {
+                $stmt->bindValue(':autorID2', null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindParam(':autorID2', $autorID2, PDO::PARAM_INT);
+            }
+            if ($autorID3 === null) {
+                $stmt->bindValue(':autorID3', null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindParam(':autorID3', $autorID3, PDO::PARAM_INT);
+            }
+            if ($autorID4 === null) {
+                $stmt->bindValue(':autorID4', null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindParam(':autorID4', $autorID4, PDO::PARAM_INT);
+            }
+            if ($autorID5 === null) {
+                $stmt->bindValue(':autorID5', null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindParam(':autorID5', $autorID5, PDO::PARAM_INT);
+            }
+            
             
             if (!$stmt->execute()) {
                 
@@ -99,7 +174,7 @@ class misLibros {
                 return false;
             }
     
-            return true; 
+            return $conexion->lastInsertId(); 
     
         } catch (Exception $e) {
            
@@ -108,18 +183,14 @@ class misLibros {
             return false;
         }
     }
-
-
     public function getLastError() {
         return $this->lastError;
     }
 
-    
-
-
-    function actualizarLibro($id, $IDLIB, $Codigo, $Titulo, $Existe, $autorID, $Autor, $Edicion, $Costo, $Fecha, $Estado, $TipoEstado, 
-    $Origen, $TipoOrigen, $Editorial, $TipoEditorial, $Area, $TipoArea, $Medio, $NombreMedio, $Clase, $TipoClase, 
-    $Observacion, $Seccion, $TipoSeccion, $Temas, $codinv, $npag, $Fimpresion, $Temas2, $Entrainv) {
+    function actualizarLibro($id, $IDLIB, $Codigo, $Titulo, $Existe, $autorID,  $Edicion, $Costo, $Fecha, $Estado, 
+    $Origen,$Editorial, $Area, $Medio, $Clase,  
+    $Observacion, $Seccion,  $Temas,  $npag, $Fimpresion, $Temas2, $Entrainv, $autorID2, 
+	$ISBN, $Ciudad, $Colacion, $Serie, $Dimensiones, $AsientosSecundarios, $Caratula, $Nota, $copia, $autorID3, $autorID4, $Resena, $autorID5) {
     
     try {
  
@@ -127,13 +198,16 @@ class misLibros {
         
 
         $consulta = "UPDATE libros SET IDLIB = :IDLIB, Codigo = :Codigo, Titulo = :Titulo, Existe = :Existe, 
-                     autorID = :autorID, Autor = :autor, Edicion = :Edicion, Costo = :Costo, Fecha = :Fecha, 
-                     Estado = :Estado, TipoEstado = :TipoEstado, Origen = :Origen, TipoOrigen = :TipoOrigen, 
-                     Editorial = :Editorial, TipoEditorial = :TipoEditorial, Area = :Area, TipoArea = :TipoArea, 
-                     Medio = :Medio, NombreMedio = :NombreMedio, Clase = :Clase, TipoClase = :TipoClase, 
-                     Observacion = :Observacion, Seccion = :Seccion, TipoSeccion = :TipoSeccion, 
-                     Temas = :Temas, codinv = :codinv, npag = :npag, Fimpresion = :Fimpresion, 
-                     Temas2 = :Temas2, Entrainv = :Entrainv WHERE ID = :ID";
+                     autorID = :autorID,  Edicion = :Edicion, Costo = :Costo, Fecha = :Fecha, 
+                     Estado = :Estado,  Origen = :Origen,  
+                     Editorial = :Editorial,  Area = :Area, 
+                     Medio = :Medio,  Clase = :Clase, 
+                     Observacion = :Observacion, Seccion = :Seccion,  Temas = :Temas,
+                     npag = :npag, Fimpresion = :Fimpresion, Temas2 = :Temas2, Entrainv = :Entrainv, autorID2 = :autorID2, 
+                     ISBN = :ISBN, Ciudad = :Ciudad, Colacion = :Colacion, Serie = :Serie,
+                     Dimensiones = :Dimensiones, AsientosSecundarios = :AsientosSecundarios, Caratula = :Caratula, Nota = :Nota, copia = :copia,
+                     autorID3= :autorID3, autorID4= :autorID4, Resena= :Resena, autorID5 = :autorID5
+                     WHERE ID = :ID";
 
         $stmt = $conexion->prepare($consulta);
 
@@ -144,33 +218,59 @@ class misLibros {
         $stmt->bindParam(':Titulo', $Titulo);
         $stmt->bindParam(':Existe', $Existe);
         $stmt->bindParam(':autorID', $autorID);
-        $stmt->bindParam(':autor', $Autor);
         $stmt->bindParam(':Edicion', $Edicion);
         $stmt->bindParam(':Costo', $Costo);
         $stmt->bindParam(':Fecha', $Fecha);
         $stmt->bindParam(':Estado', $Estado);
-        $stmt->bindParam(':TipoEstado', $TipoEstado);
         $stmt->bindParam(':Origen', $Origen);
-        $stmt->bindParam(':TipoOrigen', $TipoOrigen);
         $stmt->bindParam(':Editorial', $Editorial);
-        $stmt->bindParam(':TipoEditorial', $TipoEditorial);
         $stmt->bindParam(':Area', $Area);
-        $stmt->bindParam(':TipoArea', $TipoArea);
         $stmt->bindParam(':Medio', $Medio);
-        $stmt->bindParam(':NombreMedio', $NombreMedio);
         $stmt->bindParam(':Clase', $Clase);
-        $stmt->bindParam(':TipoClase', $TipoClase);
         $stmt->bindParam(':Observacion', $Observacion);
         $stmt->bindParam(':Seccion', $Seccion);
-        $stmt->bindParam(':TipoSeccion', $TipoSeccion);
         $stmt->bindParam(':Temas', $Temas);
-        $stmt->bindParam(':codinv', $codinv);
         $stmt->bindParam(':npag', $npag);
         $stmt->bindParam(':Fimpresion', $Fimpresion);
         $stmt->bindParam(':Temas2', $Temas2);
         $stmt->bindParam(':Entrainv', $Entrainv);
+        $stmt->bindParam(':autorID2', $autorID2);
+        $stmt->bindParam(':ISBN', $ISBN);
+        $stmt->bindParam(':Ciudad', $Ciudad);
+        $stmt->bindParam(':Colacion', $Colacion);
+        $stmt->bindParam(':Serie', $Serie);
+        $stmt->bindParam(':Dimensiones', $Dimensiones);
+        $stmt->bindParam(':AsientosSecundarios', $AsientosSecundarios);
+        $stmt->bindParam(':Caratula', $Caratula);
+        $stmt->bindParam(':Nota', $Nota);
+        $stmt->bindParam(':copia', $copia);
+        $stmt->bindParam(':autorID3', $autorID3);
+            $stmt->bindParam(':autorID4', $autorID4);
+            $stmt->bindParam(':Resena', $Resena);
+            $stmt->bindParam(':autorID5', $autorID5);
 
-     
+
+        if ($autorID2 === null) {
+            $stmt->bindValue(':autorID2', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindParam(':autorID2', $autorID2, PDO::PARAM_INT);
+        }
+        if ($autorID3 === null) {
+            $stmt->bindValue(':autorID3', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindParam(':autorID3', $autorID3, PDO::PARAM_INT);
+        }
+        if ($autorID4 === null) {
+            $stmt->bindValue(':autorID4', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindParam(':autorID4', $autorID4, PDO::PARAM_INT);
+        }
+        if ($autorID5 === null) {
+            $stmt->bindValue(':autorID5', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindParam(':autorID5', $autorID5, PDO::PARAM_INT);
+        }
+        
         if (!$stmt->execute()) {
           
             $this->lastError = $stmt->errorInfo()[2]; 
@@ -241,8 +341,6 @@ function eliminarLibro($id) {
     }
 }
 
-
-    
     function obtenerTituloLibro($id) {
     $conexion = new Conexion();
     $consulta = "SELECT titulo FROM libros WHERE ID = :id";
@@ -305,15 +403,87 @@ function actualizarActividad($ID, $Actividad){
         return false; 
     }
 }
-
 public function verLibros1($limite, $offset, $busqueda = '', $filtro = null) {
+    $conexion = new Conexion();
+
+    // Iniciamos la consulta base
+    $sql = "SELECT DISTINCT libros.*, 
+                   autor.autores AS autorNombre, 
+                   editorial.editoriales AS editorialNombre";
+
+    // Si hay una búsqueda, añadimos la columna coincidencia_indice
+    if (!empty($busqueda)) {
+        $sql .= ", CASE 
+                      WHEN indice.titulo LIKE :busqueda THEN 1 
+                      ELSE 0 
+                  END AS coincidencia_indice";
+    }
+
+    // Continuamos con los joins y el where
+    $sql .= " FROM libros
+              LEFT JOIN autor ON libros.autorID = idautor
+              LEFT JOIN editorial ON libros.Editorial = ideditorial
+              LEFT JOIN indice ON libros.ID = indice.idlibro
+              WHERE 1=1";
+
+    $params = [];
+
+    // Agregamos la condición de búsqueda si no está vacía
+    if (!empty($busqueda)) {
+        $sql .= " AND (
+            libros.ID LIKE :busqueda OR
+            libros.ISBN LIKE :busqueda OR
+            libros.IDLIB LIKE :busqueda OR
+            libros.Temas LIKE :busqueda OR
+            libros.Codigo LIKE :busqueda OR
+            libros.Titulo LIKE :busqueda OR
+            autor.autores LIKE :busqueda OR
+            editorial.editoriales LIKE :busqueda OR
+            indice.titulo LIKE :busqueda
+        )";
+        $params[':busqueda'] = '%' . $busqueda . '%';
+    }
+
+    if (!is_null($filtro)) {
+        $sql .= " AND Actividad = :filtro";
+        $params[':filtro'] = $filtro;
+    }
+
+    // Agregamos paginación
+    $sql .= " LIMIT :offset, :limite";
+    $params[':offset'] = $offset;
+    $params[':limite'] = $limite;
+
+    // Preparamos la consulta
+    $stmt = $conexion->prepare($sql);
+
+    // Solo bindeamos los valores si existen
+    if (!empty($busqueda)) {
+        $stmt->bindValue(':busqueda', '%' . $busqueda . '%', PDO::PARAM_STR);
+    }
+
+    if (!is_null($filtro)) {
+        $stmt->bindValue(':filtro', $filtro, PDO::PARAM_STR);
+    }
+
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+
+    // Ejecutamos y retornamos los resultados
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+/*public function verLibros1($limite, $offset, $busqueda = '', $filtro = null) {
     $conexion = new Conexion();
 
    
     $sql = "SELECT libros.*, autor.autores as autorNombre, editorial.editoriales as editorialNombre 
             FROM libros 
             LEFT JOIN autor ON libros.autorID = idautor 
-            LEFT JOIN editorial ON libros.Editorial = ideditorial 
+            LEFT JOIN editorial ON libros.Editorial = ideditorial
+            LEFT JOIN indice ON libros.ID= indice.idlibro 
             WHERE 1=1";
 
     $params = [];
@@ -326,7 +496,8 @@ public function verLibros1($limite, $offset, $busqueda = '', $filtro = null) {
             libros.Codigo LIKE :busqueda OR
             libros.Titulo LIKE :busqueda OR
             autor.autores LIKE :busqueda OR
-            editorial.editoriales LIKE :busqueda
+           editorial.editoriales LIKE :busqueda OR
+            indice.titulo LIKE :busqueda
         )";
         $params[':busqueda'] = '%' . $busqueda . '%';
     }
@@ -350,7 +521,7 @@ public function verLibros1($limite, $offset, $busqueda = '', $filtro = null) {
     $stmt->execute();
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+}*/
 
 
 public function contarLibros1($busqueda = '', $filtro = null) {
@@ -367,7 +538,9 @@ public function contarLibros1($busqueda = '', $filtro = null) {
     if (!empty($busqueda)) {
         $query .= " AND (
             libros.ID LIKE :busqueda OR
+            libros.ISBN LIKE :busqueda OR
             libros.IDLIB LIKE :busqueda OR
+            libros.Temas LIKE :busqueda OR
             libros.Codigo LIKE :busqueda OR
             libros.Titulo LIKE :busqueda OR
             autor.autores LIKE :busqueda OR
@@ -390,4 +563,179 @@ public function contarLibros1($busqueda = '', $filtro = null) {
 
     return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 }
+function obtenerCaratulaActual($id) {
+    $conexion = new Conexion();
+    $consulta = "SELECT Caratula FROM libros WHERE ID = :ID";
+    $stmt = $conexion->prepare($consulta);
+    $stmt->bindParam(':ID', $id);
+    $stmt->execute();
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $resultado ? $resultado['Caratula'] : null;
+}
+public function verLibros2($limite, $offset, $busqueda = '', $signatura_min = 0, $signatura_max = 999, $filtro = null, $filtro_bilingue = false ) {
+    $conexion = new Conexion();
+
+    // Iniciamos la consulta base
+    $sql = "SELECT DISTINCT libros.*, 
+                   autor.autores AS autorNombre, 
+                   editorial.editoriales AS editorialNombre";
+
+    // Si hay una búsqueda, añadimos la columna coincidencia_indice
+    if (!empty($busqueda)) {
+        $sql .= ", CASE 
+                      WHEN indice.titulo LIKE :busqueda THEN 1 
+                      ELSE 0 
+                  END AS coincidencia_indice";
+    }
+
+
+    // Continuamos con los joins y el where
+    $sql .= " FROM libros
+              LEFT JOIN autor ON libros.autorID = idautor
+              LEFT JOIN editorial ON libros.Editorial = ideditorial
+              LEFT JOIN indice ON libros.ID = indice.idlibro
+              WHERE 1=1";
+
+    $params = [];
+
+    // Agregamos la condición de búsqueda si no está vacía
+    if (!empty($busqueda)) {
+        $sql .= " AND (
+            libros.ID LIKE :busqueda OR
+            libros.ISBN LIKE :busqueda OR
+            libros.IDLIB LIKE :busqueda OR
+            libros.Temas LIKE :busqueda OR
+            libros.Codigo LIKE :busqueda OR
+            libros.Titulo LIKE :busqueda OR
+            autor.autores LIKE :busqueda OR
+            editorial.editoriales LIKE :busqueda OR
+            indice.titulo LIKE :busqueda
+        )";
+        $params[':busqueda'] = '%' . $busqueda . '%';
+    }
+
+    if (!is_null($filtro)) {
+        $sql .= " AND Actividad = :filtro";
+        $params[':filtro'] = $filtro;
+    }
+    if (!$filtro_bilingue) {
+        if ($signatura_min != 0 || $signatura_max != 999) {
+            $sql .= " AND CAST(REGEXP_SUBSTR(libros.Codigo, '[0-9]+') AS UNSIGNED) BETWEEN :signatura_min AND :signatura_max";
+            $params[':signatura_min'] = $signatura_min;
+            $params[':signatura_max'] = $signatura_max;
+        }}
+    if ($filtro_bilingue) {
+        $sql .= " AND (libros.Codigo LIKE :bilingue1 OR libros.Codigo LIKE :bilingue2)";
+
+    }
+    
+
+
+    // Agregamos paginación
+    $sql .= " LIMIT :offset, :limite";
+    $params[':offset'] = $offset;
+    $params[':limite'] = $limite;
+
+    // Preparamos la consulta
+    $stmt = $conexion->prepare($sql);
+
+    // Solo bindeamos los valores si existen
+   // SOLO bindea búsqueda si hay búsqueda
+if (!empty($busqueda)) {
+    $stmt->bindValue(':busqueda', '%' . $busqueda . '%', PDO::PARAM_STR);
+}
+
+// SOLO bindea filtro si existe
+if (!is_null($filtro)) {
+    $stmt->bindValue(':filtro', $filtro, PDO::PARAM_STR);
+}
+
+// SOLO bindea rango numérico si filtro bilingüe está desactivado
+if (!$filtro_bilingue && ($signatura_min != 0 || $signatura_max != 999)) {
+    $stmt->bindValue(':signatura_min', $signatura_min, PDO::PARAM_INT);
+    $stmt->bindValue(':signatura_max', $signatura_max, PDO::PARAM_INT);
+}
+
+
+// SOLO bindea bilingüe si está activo
+if ($filtro_bilingue) {
+    $stmt->bindValue(':bilingue1', '%LB%', PDO::PARAM_STR);
+    $stmt->bindValue(':bilingue2', '%BL%', PDO::PARAM_STR);
+}
+
+// Siempre bindea paginación
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+
+
+    // Ejecutamos y retornamos los resultados
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function contarLibros2($busqueda = '', $signatura_min = 0, $signatura_max = 999, $filtro = null, $filtro_bilingue = false) {
+    $conexion = new Conexion();
+
+    $query = "SELECT COUNT(DISTINCT libros.ID) as total FROM libros 
+              LEFT JOIN autor ON libros.autorID = idautor 
+              LEFT JOIN editorial ON libros.Editorial = ideditorial 
+              LEFT JOIN indice ON libros.ID = indice.idlibro
+              WHERE 1=1";
+
+    $params = [];
+
+    if (!empty($busqueda)) {
+        $query .= " AND (
+            libros.ID LIKE :busqueda OR
+            libros.ISBN LIKE :busqueda OR
+            libros.IDLIB LIKE :busqueda OR
+            libros.Temas LIKE :busqueda OR
+            libros.Codigo LIKE :busqueda OR
+            libros.Titulo LIKE :busqueda OR
+            autor.autores LIKE :busqueda OR
+            editorial.editoriales LIKE :busqueda OR
+            indice.titulo LIKE :busqueda
+        )";
+        $params[':busqueda'] = '%' . $busqueda . '%';
+    }
+
+    if (!is_null($filtro)) {
+        $query .= " AND Actividad = :filtro";
+        $params[':filtro'] = $filtro;
+    }
+
+    if (!$filtro_bilingue) {
+        if ($signatura_min != 0 || $signatura_max != 999) {
+            $query .= " AND CAST(REGEXP_SUBSTR(libros.Codigo, '[0-9]+') AS UNSIGNED) BETWEEN :signatura_min AND :signatura_max";
+            $params[':signatura_min'] = $signatura_min;
+            $params[':signatura_max'] = $signatura_max;
+        }
+    }
+
+    if ($filtro_bilingue) {
+        $query .= " AND (libros.Codigo LIKE :bilingue1 OR libros.Codigo LIKE :bilingue2)";
+    }
+
+    $stmt = $conexion->prepare($query);
+
+    // Bindeo de parámetros
+    foreach ($params as $key => $value) {
+        if ($key == ':signatura_min' || $key == ':signatura_max') {
+            $stmt->bindValue($key, $value, PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue($key, $value, PDO::PARAM_STR);
+        }
+    }
+
+    // Bindeo especial bilingüe
+    if ($filtro_bilingue) {
+        $stmt->bindValue(':bilingue1', '%LB%', PDO::PARAM_STR);
+        $stmt->bindValue(':bilingue2', '%BL%', PDO::PARAM_STR);
+    }
+
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+}
+
+
 }

@@ -44,4 +44,6 @@ class misPrestados {
         }
         return $arreglo;
     }
+
+    
 }
