@@ -10,10 +10,16 @@ Este proyecto es una base de datos para la biblioteca del **Gimnasio Los Almendr
 
 ## 🎥 Preview / Vista previa
 
+Gif de la preview
 <!-- Aquí puedes poner tu gif o video -->
 ![Preview](ruta/del/gif.gif)  
 <!-- O insertar un video de YouTube si lo subes allá -->
-[![Watch Video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+
+
+[![Watch Video](https://img.youtube.com/vi/c5YREJJvvt4.jpg)](https://www.youtube.com/watch?v=c5YREJJvvt4)
+
+Haz clic en la imagen para ver el video de demostración de la aplicación DBLibraryGLA en YouTube.
+
 
 ---
 
